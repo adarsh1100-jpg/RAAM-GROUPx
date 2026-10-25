@@ -1,0 +1,734 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAAM Wallet | Incentive Simulator</title>
+<style>
+:root {
+  --maroon:#762b46;
+  --dark:#501c32;
+  --pale:#faf3f5;
+  --border:#e9dce1;
+  --muted:#766d72;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  padding:24px;
+  background:#f7f4f5;
+  color:#30252b;
+  font:13px Inter,Arial,sans-serif;
+}
+.app { max-width:1120px; margin:auto; }
+.hero {
+  background:linear-gradient(120deg,#4f1d33,#853850);
+  color:white;
+  padding:26px;
+  border-radius:14px;
+}
+.hero small {
+  color:#f0ced9;
+  letter-spacing:1.4px;
+  font-weight:800;
+}
+.hero h1 {
+  margin:14px 0 4px;
+  font-size:34px;
+  letter-spacing:-1px;
+}
+.hero p { margin:5px 0; }
+.layout {
+  display:grid;
+  grid-template-columns:minmax(245px,.88fr) minmax(0,1.45fr);
+  gap:14px;
+  margin-top:14px;
+  align-items:start;
+}
+.stack { display:grid; gap:14px; min-width:0; }
+.card {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  min-width:0;
+}
+.heading {
+  color:var(--maroon);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.flex {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.control { margin-top:21px; }
+.control label { font-weight:700; font-size:12px; }
+.value {
+  color:var(--dark);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+input[type=range] {
+  width:100%;
+  accent-color:var(--maroon);
+  cursor:pointer;
+  margin:11px 0 2px;
+}
+.note {
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+.explanation {
+  margin-top:12px;
+  padding:12px;
+  background:#faf1f4;
+  border-left:3px solid var(--maroon);
+  border-radius:0 7px 7px 0;
+}
+.explanation strong { color:var(--dark); }
+.explanation p { margin:7px 0 0; }
+button {
+  border:1px solid #d8b8c4;
+  background:white;
+  color:var(--dark);
+  border-radius:7px;
+  padding:8px 12px;
+  font-weight:800;
+  cursor:pointer;
+}
+.kpis {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+.kpi {
+  padding:15px;
+  background:var(--pale);
+  border-radius:9px;
+}
+.kpi span {
+  display:block;
+  color:#695e65;
+  font-size:11px;
+}
+.kpi strong {
+  display:block;
+  margin-top:8px;
+  color:var(--dark);
+  font-size:clamp(20px,2.6vw,27px);
+  font-variant-numeric:tabular-nums;
+}
+.kpi.featured { background:#f4e5eb; }
+.tablewrap { overflow-x:auto; margin-top:14px; }
+table {
+  width:100%;
+  min-width:440px;
+  border-collapse:collapse;
+  font-size:11px;
+}
+th {
+  background:#f8f0f3;
+  color:var(--maroon);
+  padding:11px 9px;
+  text-align:right;
+}
+th:first-child { text-align:left; }
+td {
+  padding:11px 9px;
+  border-bottom:1px solid #eee5e8;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+td:first-child { text-align:left; }
+.highlight {
+  background:#f9f0f3;
+  font-weight:800;
+  color:var(--dark);
+}
+.tag {
+  padding:5px 9px;
+  background:#f5e7ed;
+  color:var(--maroon);
+  border-radius:20px;
+  font-size:10px;
+  font-weight:800;
+}
+.legend {
+  display:flex;
+  gap:18px;
+  margin:15px 0;
+  font-size:11px;
+}
+.dot {
+  display:inline-block;
+  width:10px;
+  height:10px;
+  margin-right:5px;
+  border-radius:2px;
+}
+.chartrow {
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) 105px;
+  gap:10px;
+  align-items:center;
+  margin:13px 0;
+}
+.chartrow.selected {
+  padding:8px 5px;
+  background:#fbf1f5;
+  border-radius:7px;
+}
+.track {
+  display:flex;
+  height:16px;
+  background:#f2e9ed;
+  overflow:hidden;
+  border-radius:5px;
+}
+.deliveredbar { background:var(--maroon); }
+.differencebar { background:#d8a9ba; }
+.category {
+  display:grid;
+  grid-template-columns:95px minmax(0,1fr) 42px;
+  gap:9px;
+  align-items:center;
+  margin-top:13px;
+}
+.category span { font-size:11px; font-weight:700; }
+details { margin-top:14px; }
+summary { cursor:pointer; font-weight:700; }
+.footer {
+  margin-top:14px;
+  background:#faf7f8;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:17px;
+}
+@media(max-width:720px) {
+  body { padding:12px; }
+  .layout { grid-template-columns:1fr; }
+  .hero { padding:20px; }
+  .hero h1 { font-size:27px; }
+  .card { padding:14px; }
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+<header class="hero">
+  <small>TEAM CYRUS · RAAM GROUP · MG & TOYOTA</small>
+  <h1>RAAM Wallet</h1>
+  <p><strong>Incentive Conversion & Redemption Simulator</strong></p>
+  <p style="font-size:11px;color:#f0d7e0">
+    Interactive financial illustration · No revenue or profit projections
+  </p>
+</header>
+
+<div class="layout">
+
+<div class="stack">
+
+<section class="card">
+  <div class="flex">
+    <div class="heading">01 / Adjust assumptions</div>
+    <button id="reset" type="button">Reset</button>
+  </div>
+
+  <div class="control">
+    <div class="flex">
+      <label for="sales">Eligible vehicle sales</label>
+      <span class="value" id="salesOut">100</span>
+    </div>
+    <input id="sales" type="range"
+      min="10" max="500" step="10" value="100">
+    <div class="note">
+      Only MG and Toyota sales selected for the Wallet offer.
+    </div>
+  </div>
+
+  <div class="control">
+    <div class="flex">
+      <label for="discount">Eligible discount per vehicle</label>
+      <span class="value" id="discountOut">₹30,000</span>
+    </div>
+    <input id="discount" type="range"
+      min="0" max="100000" step="1000" value="30000">
+    <div class="note">
+      Discretionary discount available for restructuring.
+    </div>
+  </div>
+
+  <div class="control">
+    <div class="flex">
+      <label for="shift">Discount shifted to Wallet</label>
+      <span class="value" id="shiftOut">50%</span>
+    </div>
+    <input id="shift" type="range"
+      min="0" max="100" step="5" value="50">
+    <div class="note">
+      The remaining share is delivered immediately.
+    </div>
+  </div>
+
+  <div class="control">
+    <div class="flex">
+      <label for="years">Wallet validity</label>
+      <span class="value" id="yearsOut">3 years</span>
+    </div>
+    <input id="years" type="range"
+      min="1" max="5" step="1" value="3">
+  </div>
+
+  <div class="control">
+    <div class="flex">
+      <label for="rate">Lifetime Wallet redemption</label>
+      <span class="value" id="rateOut">50%</span>
+    </div>
+    <input id="rate" type="range"
+      min="0" max="100" step="5" value="50">
+
+    <div class="explanation">
+      <strong id="explainTitle">
+        What does 50% redemption mean?
+      </strong>
+      <p class="note" id="explainBody"></p>
+      <p class="note" id="explainExample"></p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="heading">
+    Optional / Category-level redemption
+  </div>
+  <p class="note">
+    Illustrative maximum Wallet usage per eligible invoice.
+    These percentages do not automatically change the
+    lifetime redemption assumption.
+  </p>
+
+  <details>
+    <summary>Adjust eligible usage percentages</summary>
+
+    <div class="category">
+      <span>Paid service</span>
+      <input id="service" type="range"
+        min="0" max="50" step="5" value="20">
+      <strong class="value" id="serviceOut">20%</strong>
+    </div>
+
+    <div class="category">
+      <span>AMC purchase</span>
+      <input id="amc" type="range"
+        min="0" max="50" step="5" value="25">
+      <strong class="value" id="amcOut">25%</strong>
+    </div>
+
+    <div class="category">
+      <span>Accessories</span>
+      <input id="accessories" type="range"
+        min="0" max="50" step="5" value="30">
+      <strong class="value" id="accessoriesOut">30%</strong>
+    </div>
+
+    <div class="category">
+      <span>Mobility+</span>
+      <input id="mobility" type="range"
+        min="0" max="50" step="5" value="15">
+      <strong class="value" id="mobilityOut">15%</strong>
+    </div>
+
+    <p class="note">
+      Example: 20% service redemption permits up to
+      ₹2,000 in Wallet credits against a qualifying
+      ₹10,000 invoice, subject to balance and eligibility.
+    </p>
+  </details>
+</section>
+
+</div>
+
+<div class="stack">
+
+<section class="card">
+  <div class="heading">02 / Calculated incentive value</div>
+  <div class="kpis">
+    <div class="kpi">
+      <span>Existing incentive value</span>
+      <strong id="base">₹30.00L</strong>
+    </div>
+    <div class="kpi">
+      <span>Proposed value delivered</span>
+      <strong id="delivered">₹22.50L</strong>
+    </div>
+    <div class="kpi">
+      <span>Wallet face value issued</span>
+      <strong id="issued">₹15.00L</strong>
+    </div>
+    <div class="kpi featured">
+      <span>Nominal value not delivered</span>
+      <strong id="difference">₹7.50L</strong>
+      <span id="differencePct">25.0% of baseline</span>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="flex">
+    <div class="heading">03 / Side-by-side comparison</div>
+    <span class="tag">MATCHED BUYERS</span>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Across matched buyers</th>
+          <th>Existing upfront model</th>
+          <th>Proposed Wallet model</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Vehicles sold (matched)</td>
+          <td id="oldSales">100</td>
+          <td id="newSales">100</td>
+        </tr>
+        <tr>
+          <td>Immediate purchase discount / buyer</td>
+          <td id="oldPer">₹30,000</td>
+          <td id="newPer">₹15,000</td>
+        </tr>
+        <tr>
+          <td>Immediate discounts delivered</td>
+          <td id="oldTotal">₹30,00,000</td>
+          <td id="newTotal">₹15,00,000</td>
+        </tr>
+        <tr>
+          <td>Wallet face value issued</td>
+          <td>—</td>
+          <td id="tableIssued">₹15,00,000</td>
+        </tr>
+        <tr>
+          <td>Credits eventually redeemed</td>
+          <td>—</td>
+          <td id="tableRedeemed">₹7,50,000</td>
+        </tr>
+        <tr class="highlight">
+          <td>Total nominal incentives ultimately delivered</td>
+          <td id="oldEnd">₹30,00,000</td>
+          <td id="newEnd">₹22,50,000</td>
+        </tr>
+        <tr class="highlight">
+          <td>Difference in nominal benefits delivered</td>
+          <td>—</td>
+          <td id="tableDifference">₹7,50,000</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    Both models assume the same eligible vehicle sales.
+  </p>
+</section>
+
+<section class="card">
+  <div class="flex">
+    <div class="heading">04 / Redemption sensitivity</div>
+    <span class="tag" id="periodTag">3-YEAR VIEW</span>
+  </div>
+  <p class="note">
+    Nominal incentives delivered at different cumulative
+    Wallet redemption levels.
+  </p>
+
+  <div class="legend">
+    <span>
+      <i class="dot" style="background:#762b46"></i>
+      Delivered
+    </span>
+    <span>
+      <i class="dot" style="background:#d8a9ba"></i>
+      Difference
+    </span>
+  </div>
+
+  <div id="chart"></div>
+</section>
+
+<section class="card">
+  <div class="heading">05 / Wallet value reconciliation</div>
+
+  <div class="flex" style="margin-top:16px">
+    <span>Wallet credits issued</span>
+    <strong id="reconIssued">₹15.00L</strong>
+  </div>
+
+  <div class="track" style="margin-top:12px;height:18px">
+    <div class="deliveredbar" id="reconBar"
+      style="width:50%"></div>
+    <div class="differencebar" style="flex:1"></div>
+  </div>
+
+  <div class="flex" style="margin-top:12px">
+    <span>Redeemed: <strong id="reconUsed">₹7.50L</strong></span>
+    <span>Unredeemed: <strong id="reconUnused">₹7.50L</strong></span>
+  </div>
+
+  <p class="note" id="reconCaption"></p>
+</section>
+
+</div>
+</div>
+
+<footer class="footer">
+  <div class="heading">Interpretation & model boundaries</div>
+  <p class="note">
+    <strong>Nominal value not delivered</strong> =
+    Original upfront incentives −
+    (Revised upfront incentives + Wallet credits redeemed).
+    This is not verified dealer cash savings, accounting expense,
+    revenue or profit. Wallet issuance is discretionary,
+    not mandatory on every MG or Toyota sale.
+    Invoice-level redemption limits are illustrative and
+    separate from the assumed lifetime redemption rate.
+    Longer validity does not automatically imply higher redemption.
+  </p>
+</footer>
+
+</main>
+
+<script>
+"use strict";
+
+const defaults = {
+  sales: 100,
+  discount: 30000,
+  shift: 50,
+  years: 3,
+  rate: 50
+};
+
+const categoryDefaults = {
+  service: 20,
+  amc: 25,
+  accessories: 30,
+  mobility: 15
+};
+
+const el = id => document.getElementById(id);
+
+const currency = n =>
+  "₹" + Math.round(n).toLocaleString("en-IN");
+
+const compact = n => {
+  if (n >= 100000)
+    return "₹" + (n / 100000).toFixed(2) + "L";
+  if (n >= 1000)
+    return "₹" + (n / 1000).toFixed(1) + "K";
+  return currency(n);
+};
+
+function setText(id, value) {
+  el(id).textContent = value;
+}
+
+function update() {
+  const sales = Number(el("sales").value);
+  const discount = Number(el("discount").value);
+  const shift = Number(el("shift").value);
+  const years = Number(el("years").value);
+  const rate = Number(el("rate").value);
+
+  const period = years + (years === 1 ? " year" : " years");
+
+  const original = sales * discount;
+  const walletPerBuyer = discount * shift / 100;
+  const walletIssued = walletPerBuyer * sales;
+  const immediate = original - walletIssued;
+  const walletRedeemed = walletIssued * rate / 100;
+  const walletUnused = walletIssued - walletRedeemed;
+  const proposedDelivered = immediate + walletRedeemed;
+  const nominalDifference = original - proposedDelivered;
+
+  // Input labels
+  setText("salesOut", sales.toLocaleString("en-IN"));
+  setText("discountOut", currency(discount));
+  setText("shiftOut", shift + "%");
+  setText("yearsOut", period);
+  setText("rateOut", rate + "%");
+
+  // Fully dynamic redemption explanation
+  setText(
+    "explainTitle",
+    "What does " + rate + "% redemption mean?"
+  );
+
+  setText(
+    "explainBody",
+    "Of all Wallet credits issued, " + rate +
+    "% are actually used cumulatively across the selected " +
+    period + ". This measures the value redeemed, " +
+    "not the percentage of customers who redeemed."
+  );
+
+  setText(
+    "explainExample",
+    "For each buyer: " +
+    currency(walletPerBuyer) + " issued → " +
+    currency(walletPerBuyer * rate / 100) + " redeemed → " +
+    currency(walletPerBuyer * (1 - rate / 100)) +
+    " unused over " + period + "."
+  );
+
+  // Financial metrics
+  setText("base", compact(original));
+  setText("delivered", compact(proposedDelivered));
+  setText("issued", compact(walletIssued));
+  setText("difference", compact(nominalDifference));
+
+  setText(
+    "differencePct",
+    (original ? nominalDifference / original * 100 : 0)
+      .toFixed(1) + "% of baseline"
+  );
+
+  // Seven-row comparison table
+  setText("oldSales", sales.toLocaleString("en-IN"));
+  setText("newSales", sales.toLocaleString("en-IN"));
+  setText("oldPer", currency(discount));
+  setText("newPer", currency(discount - walletPerBuyer));
+  setText("oldTotal", currency(original));
+  setText("newTotal", currency(immediate));
+  setText("tableIssued", currency(walletIssued));
+  setText("tableRedeemed", currency(walletRedeemed));
+  setText("oldEnd", currency(original));
+  setText("newEnd", currency(proposedDelivered));
+  setText("tableDifference", currency(nominalDifference));
+
+  // Wallet reconciliation
+  setText("reconIssued", compact(walletIssued));
+  setText("reconUsed", compact(walletRedeemed));
+  setText("reconUnused", compact(walletUnused));
+
+  el("reconBar").style.width =
+    (walletIssued ? walletRedeemed / walletIssued * 100 : 0)
+    + "%";
+
+  setText(
+    "reconCaption",
+    "Assumed " + rate + "% cumulative redemption over " +
+    period + "."
+  );
+
+  // Category sliders
+  Object.keys(categoryDefaults).forEach(key => {
+    setText(key + "Out", el(key).value + "%");
+  });
+
+  // Dynamic sensitivity chart
+  setText("periodTag", years + "-YEAR VIEW");
+
+  const rates = [30, 50, 70, 100];
+
+  if (!rates.includes(rate)) {
+    rates.push(rate);
+  }
+
+  rates.sort((a, b) => a - b);
+
+  const chart = el("chart");
+  chart.replaceChildren();
+
+  rates.forEach(r => {
+    const deliveredAtRate =
+      immediate + walletIssued * r / 100;
+
+    const differenceAtRate =
+      original - deliveredAtRate;
+
+    const deliveredWidth = original
+      ? deliveredAtRate / original * 100
+      : 0;
+
+    const differenceWidth = original
+      ? differenceAtRate / original * 100
+      : 0;
+
+    const row = document.createElement("div");
+    row.className = "chartrow" +
+      (r === rate ? " selected" : "");
+
+    const label = document.createElement("strong");
+    label.textContent = r + "%";
+    label.style.color = "#762b46";
+
+    const track = document.createElement("div");
+    track.className = "track";
+
+    const deliveredBar = document.createElement("div");
+    deliveredBar.className = "deliveredbar";
+    deliveredBar.style.width = deliveredWidth + "%";
+
+    const differenceBar = document.createElement("div");
+    differenceBar.className = "differencebar";
+    differenceBar.style.width = differenceWidth + "%";
+
+    track.append(deliveredBar, differenceBar);
+
+    const amounts = document.createElement("div");
+    amounts.style.textAlign = "right";
+    amounts.style.fontSize = "11px";
+
+    const deliveredLabel = document.createElement("strong");
+    deliveredLabel.textContent = compact(deliveredAtRate);
+
+    const differenceLabel = document.createElement("div");
+    differenceLabel.style.color = "#a16d81";
+    differenceLabel.style.fontSize = "10px";
+    differenceLabel.textContent =
+      "−" + compact(differenceAtRate);
+
+    amounts.append(deliveredLabel, differenceLabel);
+    row.append(label, track, amounts);
+    chart.appendChild(row);
+  });
+}
+
+// Attach live listeners to all sliders
+[
+  ...Object.keys(defaults),
+  ...Object.keys(categoryDefaults)
+].forEach(key => {
+  el(key).addEventListener("input", update);
+  el(key).addEventListener("change", update);
+});
+
+// Reset all controls
+el("reset").addEventListener("click", () => {
+  Object.entries(defaults).forEach(([key, value]) => {
+    el(key).value = value;
+  });
+
+  Object.entries(categoryDefaults).forEach(([key, value]) => {
+    el(key).value = value;
+  });
+
+  update();
+});
+
+// Initialize the entire simulator
+update();
+</script>
+</body>
+</html>
